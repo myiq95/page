@@ -1,0 +1,11 @@
+{
+  "name": "pages-ios-tts",
+  "version": "4.0.0",
+  "private": true,
+  "dependencies": {
+    "@capacitor/core": "5.7.0",
+    "@capacitor/ios": "5.7.0",
+    "@capacitor/app": "5.0.6",
+    "@capacitor/cli": "5.7.0"
+  }
+}

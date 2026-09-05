@@ -1,0 +1,6 @@
+{
+  "appId": "com.pages.reader",
+  "appName": "PAGES",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

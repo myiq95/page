@@ -1,0 +1,2 @@
+#import <Capacitor/Capacitor.h>
+CAP_PLUGIN(BackgroundTTS, "BackgroundTTS", CAP_PLUGIN_METHOD(enableBackground, CAPPluginReturnPromise); CAP_PLUGIN_METHOD(speak, CAPPluginReturnPromise); CAP_PLUGIN_METHOD(pause, CAPPluginReturnPromise); CAP_PLUGIN_METHOD(resume, CAPPluginReturnPromise); CAP_PLUGIN_METHOD(stop, CAPPluginReturnPromise);)
