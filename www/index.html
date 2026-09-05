@@ -4,97 +4,212 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<title>PAGES</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>PAGES - Premium Reader</title>
 <style>
-  :root{--safe:env(safe-area-inset-top);--bg:#faf8f5;--ink:#1a1a1a;--line:rgba(0,0,0,0.08)}
+  :root{--safe:env(safe-area-inset-top);--bg:#faf8f5;--ink:#1a1a1a;--accent:#c4a574;--line:rgba(0,0,0,0.08)}
   *{margin:0;padding:0;box-sizing:border-box}
   html{padding-top:var(--safe);background:var(--bg)}
-  body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Pretendard',sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
   #topbar{position:fixed;top:var(--safe);left:0;right:0;height:56px;background:rgba(250,248,245,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 16px;z-index:9999}
-  .logo{display:flex;align-items:center;gap:10px}.p-icon{width:36px;height:36px;background:#1a1a1a;color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800}
-  .top-actions{display:flex;gap:8px}.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:white;display:flex;align-items:center;justify-content:center}
+  .logo{display:flex;align-items:center;gap:10px}.p-icon{width:36px;height:36px;background:#1a1a1a;color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+  .logo-text b{display:block;font-size:16px;letter-spacing:-0.02em;line-height:1}.logo-text small{font-size:10px;letter-spacing:0.1em;opacity:0.5;font-weight:500}
+  .top-actions{display:flex;gap:8px}.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:white;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all 0.15s}.icon-btn:active{transform:scale(0.92)}
   #readbar{position:fixed;top:calc(56px + var(--safe));left:0;right:0;height:60px;background:white;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:0 16px;z-index:9998}
-  .read-btn{flex:1;height:44px;border-radius:14px;border:none;background:var(--ink);color:white;font-weight:700}
-  .ctrl-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:white}
-  #fontPopup{position:fixed;top:calc(56px + var(--safe) + 8px);right:12px;width:200px;background:white;border:1px solid var(--line);border-radius:16px;padding:16px;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,0.12);display:none}
+  .read-btn{flex:1;height:44px;border-radius:14px;border:none;background:var(--ink);color:white;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .ctrl-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:white;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .font-ctrl{display:flex;align-items:center;gap:6px;margin-left:4px}.font-ctrl button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:white;font-weight:600}
+  #fontPopup{position:fixed;top:calc(56px + var(--safe) + 8px);right:12px;width:240px;background:white;border:1px solid var(--line);border-radius:16px;padding:16px;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,0.12);display:none}
   #fontPopup.open{display:block}
-  #sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;background:white;border-right:1px solid var(--line);z-index:10000;transform:translateX(-100%);transition:0.3s;display:flex;flex-direction:column;padding-top:var(--safe)}
+  #sidebar{position:fixed;top:0;left:0;bottom:0;width:300px;background:white;border-right:1px solid var(--line);z-index:10000;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);display:flex;flex-direction:column;padding-top:var(--safe)}
   #sidebar.open{transform:translateX(0)}
+  #sidebar-head{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line);flex-shrink:0}
+  #sidebar-body{flex:1;overflow-y:auto;padding:16px}
   #overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:9999;display:none}
   #overlay.open{display:block}
-  #main{margin-top:calc(56px + 60px + var(--safe))}
-  #empty{text-align:center;padding:80px 20px;color:#888}
-  #content{padding:24px 20px 120px;max-width:700px;margin:0 auto;line-height:1.9;font-size:18px;word-break:keep-all}
-  #content p{margin-bottom:1.4em}
-  #content h2{font-size:22px;font-weight:800;margin:32px 0 16px}
+  .toc-item{padding:12px 12px;border-radius:12px;cursor:pointer;font-size:14px;line-height:1.4;margin-bottom:6px;transition:background 0.15s;border:1px solid transparent}
+  .toc-item:hover{background:#f5f2ef;border-color:var(--line)}.toc-item.active{background:var(--ink);color:white}
+  .toc-item .meta{font-size:11px;opacity:0.6;margin-top:4px}
+  #main{margin-top:calc(56px + 60px + var(--safe));min-height:100vh}
+  #empty{text-align:center;padding:80px 20px;color:#888;max-width:400px;margin:0 auto}
+  #content{padding:24px 20px 140px;max-width:700px;margin:0 auto;line-height:1.9;font-size:18px;word-break:keep-all;overflow-wrap:break-word}
+  #content h2{font-size:22px;font-weight:800;margin:40px 0 16px;letter-spacing:-0.02em}
+  #content p{margin-bottom:1.4em;text-align:justify;transition:all 0.3s}
+  #content p.active{background:rgba(196,165,116,0.18);border-radius:12px;padding:8px 12px;margin-left:-12px;margin-right:-12px;box-shadow:0 2px 12px rgba(196,165,116,0.15)}
+  .chapter-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#f1ece5;border:1px solid var(--line);font-size:12px;font-weight:600;margin-bottom:20px}
+  .chapter-divider{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:32px 0}
   #fileInput{display:none}
+  #bgIndicator{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:white;padding:10px 18px;border-radius:999px;font-size:12px;font-weight:600;z-index:9997;display:none;align-items:center;gap:8px}
+  #bgIndicator.show{display:flex}
+  .dot{width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
 </style>
 </head>
 <body>
-<header id="topbar"><div class="logo"><div class="p-icon">P</div><div><b>PAGES</b><small>PREMIUM READER</small></div></div><div class="top-actions"><button class="icon-btn" onclick="fileInput.click()">📂</button><button class="icon-btn" onclick="fontPopup.classList.toggle('open')" style="font-weight:700">Aa</button><button class="icon-btn" onclick="sidebar.classList.toggle('open');overlay.classList.toggle('open')">☰</button></div></header>
-<div id="readbar"><button id="playBtn" class="read-btn" onclick="toggleRead()">▶ 읽기 시작</button><button class="ctrl-btn" onclick="stopRead()">■</button><button class="ctrl-btn" onclick="changeFont(-1)">-</button><span id="fl" style="min-width:28px;text-align:center;font-size:13px">18</span><button class="ctrl-btn" onclick="changeFont(1)">+</button></div>
-<div id="fontPopup"><div style="font-weight:700;font-size:13px;margin-bottom:12px">글자 크기</div><input type="range" min="12" max="32" value="18" id="slider" style="width:100%" oninput="setFont(this.value)"><div style="text-align:center;margin-top:8px"><span id="fl2" style="font-weight:700">18px</span></div><button onclick="fontPopup.classList.remove('open')" style="width:100%;margin-top:12px;padding:8px;border-radius:8px;border:1px solid var(--line);background:white">닫기</button></div>
-<div id="overlay" onclick="sidebar.classList.remove('open');this.classList.remove('open')"></div>
-<aside id="sidebar"><div style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line)"><b>목차</b><button class="icon-btn" style="width:32px;height:32px" onclick="sidebar.classList.remove('open');overlay.classList.remove('open')">✕</button></div><div style="flex:1;overflow-y:auto;padding:16px"><div id="tocList" style="font-size:13px;color:#888">파일을 열면 목차가 생겨요</div></div></aside>
-<input type="file" id="fileInput" accept=".txt,.md">
-<div id="main"><div id="empty"><div style="font-size:48px;margin-bottom:12px">📖</div><div style="font-weight:700;color:#222;margin-bottom:8px">파일을 열어주세요</div><div style="font-size:12px;opacity:0.6;margin-bottom:16px">잠금화면 백그라운드 재생 - 무음 OFF, 볼륨 UP 필수</div><button onclick="fileInput.click()" style="padding:12px 24px;border-radius:12px;background:#1a1a1a;color:white;border:none;font-weight:600">파일 열기</button></div><article id="content" style="display:none"></article></div>
+<header id="topbar">
+  <div class="logo"><div class="p-icon">P</div><div class="logo-text"><b>PAGES</b><small>PREMIUM READER</small></div></div>
+  <div class="top-actions">
+    <button class="icon-btn" onclick="fileInput.click()" title="파일 열기">📂</button>
+    <button class="icon-btn" id="aaBtn" onclick="toggleFontPopup()" title="글자 크기" style="font-weight:700">Aa</button>
+    <button class="icon-btn" id="menuBtn" onclick="toggleSidebar()" title="목차">☰</button>
+  </div>
+</header>
+
+<div id="readbar">
+  <button id="playBtn" class="read-btn" onclick="toggleRead()"><span id="playIcon">▶</span> <span id="playText">읽기 시작</span></button>
+  <button class="ctrl-btn" onclick="stopRead()" title="정지">■</button>
+  <div class="font-ctrl">
+    <button onclick="changeFont(-1)">-</button>
+    <span id="fontLabel" style="font-size:13px;min-width:28px;text-align:center">18</span>
+    <button onclick="changeFont(1)">+</button>
+  </div>
+</div>
+
+<div id="fontPopup">
+  <div style="font-size:13px;font-weight:700;margin-bottom:12px;opacity:0.7">글자 크기 & 읽기 속도</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <button onclick="changeFont(-1)" style="width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:white;font-weight:700;font-size:18px">-</button>
+    <div style="text-align:center"><div id="popupFontLabel" style="font-weight:800;font-size:20px">18px</div><div style="font-size:11px;opacity:0.6">크기</div></div>
+    <button onclick="changeFont(1)" style="width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:white;font-weight:700;font-size:18px">+</button>
+  </div>
+  <input type="range" id="fontSlider" min="12" max="32" value="18" style="width:100%;margin:8px 0" oninput="setFont(this.value)">
+  <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">
+    <div style="font-size:12px;font-weight:600;opacity:0.6;margin-bottom:8px">읽기 속도</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="setSpeed(0.5)" class="speed-btn" data-speed="0.5" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:white;font-size:12px">느리게</button>
+      <button onclick="setSpeed(0.9)" class="speed-btn active" data-speed="0.9" style="flex:1;padding:8px;border-radius:8px;background:var(--ink);color:white;border-color:var(--ink);font-size:12px">보통</button>
+      <button onclick="setSpeed(1.2)" class="speed-btn" data-speed="1.2" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:white;font-size:12px">빠르게</button>
+    </div>
+  </div>
+  <div id="fontPreview" style="margin-top:12px;padding:12px;background:#faf8f5;border-radius:12px;font-size:14px;line-height:1.6;text-align:center">미리보기<br>글자 크기가 이렇게 보여요</div>
+  <button onclick="toggleFontPopup()" style="width:100%;margin-top:12px;padding:10px;border-radius:10px;border:1px solid var(--line);background:white;font-size:13px;font-weight:600">닫기</button>
+</div>
+
+<div id="overlay" onclick="toggleSidebar()"></div>
+<aside id="sidebar">
+  <div id="sidebar-head"><div style="font-weight:700">목차</div><button class="icon-btn" style="width:32px;height:32px" onclick="toggleSidebar()">✕</button></div>
+  <div id="sidebar-body">
+    <div id="tocList" style="color:#888;font-size:13px">파일을 열면 목차가 생겨요<br><br>예: 제1장, 프롤로그, ?? 등으로 시작하는 줄을 자동으로 챕터로 인식해요</div>
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line)">
+      <div style="font-size:12px;font-weight:600;opacity:0.6;margin-bottom:8px">파일 정보</div>
+      <div id="fileInfo" style="font-size:13px;line-height:1.6;color:#666">-</div>
+      <div style="margin-top:16px;padding:12px;background:#f5f2ef;border-radius:10px;font-size:11px;line-height:1.5;opacity:0.7">
+        💡 팁: 무음 스위치 OFF, 볼륨 UP 상태에서 잠금화면에서도 계속 읽어줘요
+      </div>
+    </div>
+  </div>
+</aside>
+
+<input type="file" id="fileInput" accept=".txt,.md,.html">
+<div id="main">
+  <div id="empty">
+    <div style="font-size:48px;margin-bottom:16px">📖</div>
+    <div style="font-size:18px;font-weight:700;color:#222;margin-bottom:8px">PAGES 프리미엄 리더</div>
+    <div style="font-size:13px;margin-bottom:4px;line-height:1.5">목차 · 글자 크기 · 잠금화면 읽기</div>
+    <div style="font-size:11px;opacity:0.5;margin-bottom:24px">모든 기능이 포함된 완전체</div>
+    <button onclick="fileInput.click()" style="padding:14px 28px;border-radius:14px;background:var(--ink);color:white;border:none;font-weight:700;font-size:14px">파일 열기</button>
+  </div>
+  <article id="content" style="display:none"></article>
+</div>
+
+<div id="bgIndicator"><div class="dot"></div> 🔊 백그라운드 재생 중</div>
+
 <script>
-let paras=[], idx=0, speaking=false, fsize=18;
+let paras=[], chaps=[], idx=0, speaking=false, fsize=18, speed=0.9;
 let synth=window.speechSynthesis;
-function changeFont(d){setFont(fsize+d)}
-function setFont(s){fsize=Math.max(12,Math.min(32,parseInt(s)));document.getElementById('content').style.fontSize=fsize+'px';document.getElementById('fl').textContent=fsize;document.getElementById('fl2').textContent=fsize+'px';document.getElementById('slider').value=fsize;localStorage.setItem('fs',fsize)}
-const savedFs=localStorage.getItem('fs'); if(savedFs){fsize=parseInt(savedFs);document.getElementById('fl').textContent=fsize;document.getElementById('fl2').textContent=fsize+'px';document.getElementById('slider').value=fsize;}
-fileInput.addEventListener('change', async(e)=>{const f=e.target.files[0];if(!f)return;const t=await f.text();load(t)});
-function load(raw){
-  let ps=raw.trim().split(/\n\n+/).map(s=>s.trim()).filter(Boolean);
-  if(ps.length<3) ps=raw.trim().split(/\n+/).map(s=>s.trim()).filter(Boolean);
-  if(ps.length<3) ps=raw.split(/(?<=[.!?])\s+/).filter(s=>s.trim().length>5);
-  paras=ps; render();
+const fontLabel=document.getElementById('fontLabel');
+const popupLabel=document.getElementById('popupFontLabel');
+const slider=document.getElementById('fontSlider');
+const preview=document.getElementById('fontPreview');
+const savedFs=localStorage.getItem('pages-fs');
+const savedSpeed=localStorage.getItem('pages-speed');
+if(savedFs){fsize=parseInt(savedFs); fontLabel.textContent=fsize; popupLabel.textContent=fsize+'px'; slider.value=fsize; preview.style.fontSize=fsize+'px';}
+if(savedSpeed){speed=parseFloat(savedSpeed); document.querySelectorAll('.speed-btn').forEach(b=>{b.classList.toggle('active', parseFloat(b.dataset.speed)===speed); if(b.classList.contains('active')){b.style.background='var(--ink)'; b.style.color='white';}else{b.style.background='white'; b.style.color='var(--ink)';}});}
+
+function toggleSidebar(){const sb=document.getElementById('sidebar');const ov=document.getElementById('overlay');sb.classList.toggle('open');ov.classList.toggle('open');}
+function toggleFontPopup(){document.getElementById('fontPopup').classList.toggle('open');}
+function changeFont(d){setFont(fsize+d);}
+function setFont(s){fsize=Math.max(12,Math.min(32,parseInt(s)));document.getElementById('content').style.fontSize=fsize+'px';fontLabel.textContent=fsize;popupLabel.textContent=fsize+'px';slider.value=fsize;preview.style.fontSize=fsize+'px';localStorage.setItem('pages-fs',fsize);}
+function setSpeed(s){speed=s;localStorage.setItem('pages-speed',s);document.querySelectorAll('.speed-btn').forEach(b=>{const isActive=parseFloat(b.dataset.speed)===s; b.classList.toggle('active', isActive); b.style.background=isActive?'var(--ink)':'white'; b.style.color=isActive?'white':'var(--ink)';});}
+
+fileInput.addEventListener('change', async(e)=>{const f=e.target.files[0];if(!f)return;const t=await f.text();loadBook(t,f.name);});
+function loadBook(rawText,fileName){
+  let text=rawText.trim();let rawParas=[];
+  if(text.includes('\n\n')){rawParas=text.split(/\n\s*\n+/).map(s=>s.trim()).filter(Boolean);}
+  else if(text.includes('\n')){rawParas=text.split(/\n+/).map(s=>s.trim()).filter(Boolean);}
+  else{rawParas=text.split(/(?<=[.!?\"”’] )/).map(s=>s.trim()).filter(s=>s.length>10);let refined=[];rawParas.forEach(p=>{if(p.length>400){let sents=p.split(/(?<=[다요까\.\?\!])\s+/);let chunk='';sents.forEach(s=>{if((chunk+s).length>350){refined.push(chunk);chunk=s}else{chunk+=(chunk?' ':'')+s}});if(chunk)refined.push(chunk);}else refined.push(p);});rawParas=refined;}
+
+  let chTmp=[];let cur={title:'프롤로그',items:[],start:0};
+  rawParas.forEach((para,i)=>{
+    const isTitle = /^(제\s*\d+장|\d+장|\d+\.|Chapter\s*\d+|프롤로그|에필로그|서문|서론|\?\?)/i.test(para.slice(0,20)) && para.length<80;
+    if(isTitle && cur.items.length>0){chTmp.push(cur);cur={title:para.slice(0,60),items:[],start:i};}
+    else{cur.items.push({t:para, idx:i});}
+  });
+  if(cur.items.length>0) chTmp.push(cur);
+  if(chTmp.length===0) chTmp=[{title:'전체',items:rawParas.map((t,i)=>({t,idx:i})),start:0}];
+
+  chaps=chTmp; paras=rawParas; render(fileName);
 }
-function render(){
-  const c=document.getElementById('content');const e=document.getElementById('empty');
-  let h=''; ps=paras; ps.forEach((p,i)=>{h+=`<p id="p-${i}">${p.replace(/</g,'&lt;')}</p>`;});
-  c.innerHTML=h; c.style.display='block'; c.style.fontSize=fsize+'px'; e.style.display='none';
-  document.getElementById('tocList').innerHTML=paras.slice(0,50).map((p,i)=>`<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;cursor:pointer" onclick="idx=${i};document.getElementById('p-${i}').scrollIntoView({behavior:'smooth'});sidebar.classList.remove('open');overlay.classList.remove('open');updateBtn()">${p.slice(0,40)}...</div>`).join('');
+
+function render(fileName){
+  const c=document.getElementById('content');const e=document.getElementById('empty');let h='';let g=0;
+  chaps.forEach((ch,ci)=>{
+    if(chaps.length>1){
+      h+=`<div class="chapter-badge">${ci+1}장 · ${ch.items.length} 문단</div>`;
+      h+=`<h2 id="ch-${ci}">${esc(ch.title)}</h2>`;
+    }
+    ch.items.forEach(it=>{
+      h+=`<p id="p-${g}">${esc(it.t)}</p>`; g++;
+    });
+    if(ci<chaps.length-1) h+=`<div class="chapter-divider"></div>`;
+  });
+  c.innerHTML=h;c.style.display='block';c.style.fontSize=fsize+'px';e.style.display='none';
+  document.getElementById('tocList').innerHTML=chaps.map((ch,i)=>`<div class="toc-item" onclick="jumpTo(${i})"><div>${esc(ch.title)}</div><div class="meta">${ch.items.length} 문단 · ${ch.items.reduce((s,it)=>s+it.t.length,0)}자</div></div>`).join('');
+  document.getElementById('fileInfo').innerHTML=`파일: ${fileName}<br>${chaps.length} 챕터 · ${paras.length} 문단<br>${paras.reduce((s,p)=>s+p.length,0).toLocaleString()} 글자<br><br>읽기 속도: ${speed}x`;
   idx=0; updateBtn();
 }
-function toggleRead(){ if(speaking) pauseRead(); else startRead(); }
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function jumpTo(i){
+  const el=document.getElementById('ch-'+i) || document.getElementById('p-'+chaps[i].start);
+  if(el){el.scrollIntoView({behavior:'smooth',block:'start'}); idx=chaps[i].start; updateBtn(); toggleSidebar();}
+}
+
+function toggleRead(){if(speaking) pauseRead(); else startRead();}
 function startRead(){
-  if(paras.length===0){ alert('파일 열어주세요'); return; }
-  // Native only - background works
+  if(paras.length===0){alert('파일을 열어주세요 📂');return;}
   if(window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.BackgroundTTS){
-    Capacitor.Plugins.BackgroundTTS.speak({text: paras[idx], rate: 0.5});
-    speaking=true; updateBtn(); return;
+    Capacitor.Plugins.BackgroundTTS.speak({text: paras[idx], rate: speed});
+    speaking=true; updateBtn();
+    document.getElementById('bgIndicator').classList.add('show');
+    return;
   }
-  // Fallback web (will die in background, but for testing)
-  if(synth.paused){ synth.resume(); speaking=true; updateBtn(); return; }
+  if(synth.paused){synth.resume(); speaking=true; updateBtn(); document.getElementById('bgIndicator').classList.add('show'); return;}
   if(synth.speaking) synth.cancel();
   const u=new SpeechSynthesisUtterance(paras[idx]);
-  u.lang='ko-KR'; u.rate=0.9; u.volume=1;
-  u.onend=()=>{ idx++; if(idx<paras.length && speaking){ startRead(); } else { speaking=false; updateBtn(); } };
-  synth.speak(u); speaking=true; updateBtn();
+  u.lang='ko-KR'; u.rate=speed; u.volume=1;
+  u.onend=()=>{idx++; if(idx<paras.length && speaking){startRead();} else {speaking=false; updateBtn(); document.getElementById('bgIndicator').classList.remove('show');}};
+  u.onerror=()=>{speaking=false; updateBtn(); document.getElementById('bgIndicator').classList.remove('show');};
+  synth.speak(u); speaking=true; updateBtn(); document.getElementById('bgIndicator').classList.add('show');
 }
 function pauseRead(){
-  if(window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.BackgroundTTS){
-    try{ Capacitor.Plugins.BackgroundTTS.pause(); }catch(e){}
-  } else { synth.pause(); }
-  speaking=false; updateBtn();
+  if(window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.BackgroundTTS){try{Capacitor.Plugins.BackgroundTTS.pause();}catch(e){}} else synth.pause();
+  speaking=false; updateBtn(); document.getElementById('bgIndicator').classList.remove('show');
 }
 function stopRead(){
-  if(window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.BackgroundTTS){
-    try{ Capacitor.Plugins.BackgroundTTS.stop(); }catch(e){}
-  } else { synth.cancel(); }
-  speaking=false; idx=0; updateBtn();
+  if(window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.BackgroundTTS){try{Capacitor.Plugins.BackgroundTTS.stop();}catch(e){}} else synth.cancel();
+  speaking=false; idx=0; updateBtn(); document.getElementById('bgIndicator').classList.remove('show');
 }
 function updateBtn(){
-  document.getElementById('playBtn').textContent = speaking ? '⏸ 일시정지' : '▶ 읽기 시작';
-  document.querySelectorAll('#content p').forEach(p=>p.style.background='');
+  document.getElementById('playIcon').textContent=speaking?'⏸':'▶';
+  document.getElementById('playText').textContent=speaking?`일시정지 (${idx+1}/${paras.length})`:(idx>0?'이어서 읽기':'읽기 시작');
+  document.querySelectorAll('#content p').forEach(p=>p.classList.remove('active'));
   const cur=document.getElementById('p-'+idx);
-  if(cur){ cur.style.background='rgba(196,165,116,0.2)'; cur.style.borderRadius='8px'; cur.style.padding='4px 8px'; cur.scrollIntoView({behavior:'smooth', block:'center'}); }
+  if(cur){cur.classList.add('active'); cur.scrollIntoView({behavior:'smooth',block:'center'});}
+  document.querySelectorAll('.toc-item').forEach((el,i)=>{el.classList.toggle('active', chaps[i] && idx>=chaps[i].start && (i===chaps.length-1 || idx<chaps[i+1].start));});
 }
 if(window.Capacitor){
   const p=window.Capacitor.Plugins.BackgroundTTS;
-  if(p){ p.addListener('ttsFinished', ()=>{ idx++; if(idx<paras.length){ startRead(); } else { speaking=false; updateBtn(); } }); }
+  if(p){p.addListener('ttsFinished',()=>{idx++; if(idx<paras.length){startRead();} else {speaking=false; updateBtn(); document.getElementById('bgIndicator').classList.remove('show');}});}
 }
 </script>
 </body>

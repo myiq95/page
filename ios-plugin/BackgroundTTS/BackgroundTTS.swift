@@ -5,82 +5,43 @@ import MediaPlayer
 
 @objc(BackgroundTTS)
 public class BackgroundTTS: CAPPlugin, AVSpeechSynthesizerDelegate {
-    private let synthesizer = AVSpeechSynthesizer()
-
+    private let synth = AVSpeechSynthesizer()
     override public func load() {
-        print("[PAGES] BackgroundTTS loaded - background audio enabled")
-        synthesizer.delegate = self
-        setupAudio()
-        setupRemote()
+        synth.delegate = self
+        setup()
     }
-
-    private func setupAudio() {
+    private func setup() {
         do {
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers, .mixWithOthers])
-            try session.setActive(true)
-        } catch {
-            print("[PAGES] Audio session error: \(error)")
-        }
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.duckOthers, .mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {}
+        let c = MPRemoteCommandCenter.shared()
+        c.playCommand.isEnabled = true
+        c.pauseCommand.isEnabled = true
+        c.playCommand.addTarget { [weak self] _ in self?.setup(); self?.synth.continueSpeaking(); return .success }
+        c.pauseCommand.addTarget { [weak self] _ in self?.synth.pauseSpeaking(at: .word); return .success }
     }
-
-    @objc func enableBackground(_ call: CAPPluginCall) {
-        setupAudio()
-        call.resolve(["enabled": true])
-    }
-
+    @objc func enableBackground(_ call: CAPPluginCall) { setup(); call.resolve() }
     @objc func speak(_ call: CAPPluginCall) {
-        guard let text = call.getString("text") else { call.reject("no text"); return }
-        let rate = call.getFloat("rate") ?? 0.5
-        setupAudio()
-        synthesizer.stopSpeaking(at: .immediate)
-        let utter = AVSpeechUtterance(string: text)
-        utter.voice = AVSpeechSynthesisVoice(language: "ko-KR")
-        utter.rate = rate
-        utter.volume = 1.0
-
+        guard let t = call.getString("text") else { call.reject("no text"); return }
+        let r = call.getFloat("rate") ?? 0.9
+        setup()
+        synth.stopSpeaking(at: .immediate)
+        let u = AVSpeechUtterance(string: t)
+        u.voice = AVSpeechSynthesisVoice(language: "ko-KR")
+        u.rate = r
+        u.volume = 1.0
         var info: [String: Any] = [:]
-        info[MPMediaItemPropertyTitle] = String(text.prefix(60))
-        info[MPMediaItemPropertyArtist] = "PAGES - 백그라운드 재생"
+        info[MPMediaItemPropertyTitle] = String(t.prefix(60))
+        info[MPMediaItemPropertyArtist] = "PAGES"
         info[MPNowPlayingInfoPropertyPlaybackRate] = 1.0
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
-
-        synthesizer.speak(utter)
+        synth.speak(u)
         call.resolve()
     }
-
-    @objc func pause(_ call: CAPPluginCall) {
-        synthesizer.pauseSpeaking(at: .word)
-        call.resolve()
-    }
-
-    @objc func resume(_ call: CAPPluginCall) {
-        setupAudio()
-        synthesizer.continueSpeaking()
-        call.resolve()
-    }
-
-    @objc func stop(_ call: CAPPluginCall) {
-        synthesizer.stopSpeaking(at: .immediate)
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-        call.resolve()
-    }
-
-    private func setupRemote() {
-        let center = MPRemoteCommandCenter.shared()
-        center.playCommand.isEnabled = true
-        center.pauseCommand.isEnabled = true
-        center.playCommand.addTarget { [weak self] _ in
-            self?.setupAudio()
-            self?.synthesizer.continueSpeaking()
-            return .success
-        }
-        center.pauseCommand.addTarget { [weak self] _ in
-            self?.synthesizer.pauseSpeaking(at: .word)
-            return .success
-        }
-    }
-
+    @objc func pause(_ call: CAPPluginCall) { synth.pauseSpeaking(at: .word); call.resolve() }
+    @objc func resume(_ call: CAPPluginCall) { setup(); synth.continueSpeaking(); call.resolve() }
+    @objc func stop(_ call: CAPPluginCall) { synth.stopSpeaking(at: .immediate); MPNowPlayingInfoCenter.default().nowPlayingInfo=nil; call.resolve() }
     public func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         notifyListeners("ttsFinished", data: [:])
     }
