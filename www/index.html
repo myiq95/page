@@ -74,11 +74,17 @@
   </div>
   <input type="range" id="fontSlider" min="12" max="32" value="18" style="width:100%;margin:8px 0" oninput="setFont(this.value)">
   <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">
-    <div style="font-size:12px;font-weight:600;opacity:0.6;margin-bottom:8px">읽기 속도</div>
-    <div style="display:flex;gap:8px">
-      <button onclick="setSpeed(0.5)" class="speed-btn" data-speed="0.5" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:white;font-size:12px">느리게</button>
-      <button onclick="setSpeed(0.9)" class="speed-btn active" data-speed="0.9" style="flex:1;padding:8px;border-radius:8px;background:var(--ink);color:white;border-color:var(--ink);font-size:12px">보통</button>
-      <button onclick="setSpeed(1.2)" class="speed-btn" data-speed="1.2" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:white;font-size:12px">빠르게</button>
+    <div style="font-size:12px;font-weight:600;opacity:0.6;margin-bottom:8px">읽기 속도 (느리게가 보통)</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button onclick="setSpeed(0.30)" class="speed-btn" data-speed="0.3" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:white;font-size:11px">매우 느리게<br><span style="opacity:0.6">0.30x</span></button>
+      <button onclick="setSpeed(0.38)" class="speed-btn active" data-speed="0.38" style="flex:1;padding:8px;border-radius:8px;background:var(--ink);color:white;border-color:var(--ink);font-size:11px">느리게(보통)<br><span style="opacity:0.8">0.38x</span></button>
+      <button onclick="setSpeed(0.48)" class="speed-btn" data-speed="0.48" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:white;font-size:11px">조금 빠르게<br><span style="opacity:0.6">0.48x</span></button>
+      <button onclick="setSpeed(0.58)" class="speed-btn" data-speed="0.58" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--line);background:white;font-size:11px">빠르게<br><span style="opacity:0.6">0.58x</span></button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;opacity:0.6">세밀 조절</span>
+      <input type="range" id="speedSlider" min="0.25" max="0.70" step="0.02" value="0.38" style="flex:1" oninput="setSpeed(parseFloat(this.value))">
+      <span id="speedLabel" style="font-size:12px;font-weight:700;min-width:40px;text-align:right">0.38x</span>
     </div>
   </div>
   <div id="fontPreview" style="margin-top:12px;padding:12px;background:#faf8f5;border-radius:12px;font-size:14px;line-height:1.6;text-align:center">미리보기<br>글자 크기가 이렇게 보여요</div>
@@ -115,7 +121,7 @@
 <div id="bgIndicator"><div class="dot"></div> 🔊 백그라운드 재생 중</div>
 
 <script>
-let paras=[], chaps=[], idx=0, speaking=false, fsize=18, speed=0.9;
+let paras=[], chaps=[], idx=0, speaking=false, fsize=18, speed=0.38;
 let synth=window.speechSynthesis;
 const fontLabel=document.getElementById('fontLabel');
 const popupLabel=document.getElementById('popupFontLabel');
@@ -124,13 +130,28 @@ const preview=document.getElementById('fontPreview');
 const savedFs=localStorage.getItem('pages-fs');
 const savedSpeed=localStorage.getItem('pages-speed');
 if(savedFs){fsize=parseInt(savedFs); fontLabel.textContent=fsize; popupLabel.textContent=fsize+'px'; slider.value=fsize; preview.style.fontSize=fsize+'px';}
-if(savedSpeed){speed=parseFloat(savedSpeed); document.querySelectorAll('.speed-btn').forEach(b=>{b.classList.toggle('active', parseFloat(b.dataset.speed)===speed); if(b.classList.contains('active')){b.style.background='var(--ink)'; b.style.color='white';}else{b.style.background='white'; b.style.color='var(--ink)';}});}
+if(savedSpeed){speed=parseFloat(savedSpeed); setTimeout(()=>setSpeed(speed),100);}
 
 function toggleSidebar(){const sb=document.getElementById('sidebar');const ov=document.getElementById('overlay');sb.classList.toggle('open');ov.classList.toggle('open');}
 function toggleFontPopup(){document.getElementById('fontPopup').classList.toggle('open');}
 function changeFont(d){setFont(fsize+d);}
 function setFont(s){fsize=Math.max(12,Math.min(32,parseInt(s)));document.getElementById('content').style.fontSize=fsize+'px';fontLabel.textContent=fsize;popupLabel.textContent=fsize+'px';slider.value=fsize;preview.style.fontSize=fsize+'px';localStorage.setItem('pages-fs',fsize);}
-function setSpeed(s){speed=s;localStorage.setItem('pages-speed',s);document.querySelectorAll('.speed-btn').forEach(b=>{const isActive=parseFloat(b.dataset.speed)===s; b.classList.toggle('active', isActive); b.style.background=isActive?'var(--ink)':'white'; b.style.color=isActive?'white':'var(--ink)';});}
+function setSpeed(s){
+  speed=Math.max(0.2,Math.min(1.0,parseFloat(s)));
+  localStorage.setItem('pages-speed',speed);
+  const slider=document.getElementById('speedSlider');
+  const label=document.getElementById('speedLabel');
+  if(slider) slider.value=speed;
+  if(label) label.textContent=speed.toFixed(2)+'x';
+  document.querySelectorAll('.speed-btn').forEach(b=>{
+    const btnSpeed=parseFloat(b.dataset.speed);
+    const isActive=Math.abs(btnSpeed-speed)<0.02;
+    b.classList.toggle('active', isActive);
+    b.style.background=isActive?'var(--ink)':'white';
+    b.style.color=isActive?'white':'var(--ink)';
+  });
+  document.getElementById('fileInfo').innerHTML=document.getElementById('fileInfo').innerHTML.replace(/읽기 속도:.*/,'읽기 속도: '+speed.toFixed(2)+'x');
+}
 
 fileInput.addEventListener('change', async(e)=>{const f=e.target.files[0];if(!f)return;const t=await f.text();loadBook(t,f.name);});
 function loadBook(rawText,fileName){
