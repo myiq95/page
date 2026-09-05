@@ -1,4 +1,4 @@
-name: Build IPA - Background Audio FIXED (Pod Method)
+name: Build IPA - Background Audio FIXED
 
 on:
   push:
@@ -19,38 +19,28 @@ jobs:
         run: |
           npm install -g @capacitor/cli@5.7.0
           npm install
-          cap --version
 
       - name: Add iOS platform
         run: |
           cap add ios
-          ls ios/App/App/
 
-      - name: Inject BackgroundTTS via CocoaPods (No pbxproj hack)
+      - name: Inject BackgroundTTS via CocoaPods
         run: |
-          echo "=== Setting up BackgroundTTS as CocoaPod ==="
-          # Add pod to Podfile
-          cat ios/App/Podfile
-          echo ""
           echo "pod 'BackgroundTTS', :path => '../../ios-plugin'" >> ios/App/Podfile
-          echo "=== Updated Podfile ==="
           cat ios/App/Podfile
-
-          echo "=== Adding background audio to Info.plist ==="
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" ios/App/App/Info.plist 2>/dev/null || true
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" ios/App/App/Info.plist 2>/dev/null || true
-          /usr/libexec/PlistBuddy -c "Print :UIBackgroundModes" ios/App/App/Info.plist
 
       - name: Copy web assets
         run: |
           cap copy ios
 
-      - name: Pod install (will compile BackgroundTTS)
+      - name: Pod install
         run: |
           cd ios/App
-          pod install --repo-update --verbose
+          pod install --repo-update
           echo "=== Pods installed ==="
-          ls Pods/ | grep Background
+          ls Pods/ | grep -i background || true
           cd ../..
 
       - name: Build IPA
@@ -60,23 +50,13 @@ jobs:
           xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -derivedDataPath ../../build/DerivedData build | tee ../../build/build.log
           cd ../..
 
-      - name: Create IPA with proper symlinks
+      - name: Create IPA
         run: |
           APP_PATH=$(find build -name "App.app" -type d | head -1)
-          echo "App at $APP_PATH"
-          ls -lh "$APP_PATH"
-          echo "Checking executable:"
-          ls -lh "$APP_PATH/App" || ls -lh "$APP_PATH"/ | head -20
-
           mkdir -p build/Payload
-          # Use ditto to preserve symlinks and avoid Bad file descriptor error
-          ditto "$APP_PATH" build/Payload/App.app || cp -R "$APP_PATH" build/Payload/
-
+          ditto "$APP_PATH" build/Payload/App.app
           cd build
-          # Use zip with symlinks preserved
           zip -ry PAGES-Background-Fixed.ipa Payload
-          ls -lh *.ipa
-          unzip -l PAGES-Background-Fixed.ipa | head -30
           cd ..
 
       - name: Upload IPA
