@@ -1,4 +1,4 @@
-name: Build IPA - Background Audio FIXED
+name: Build IPA - Premium + Icon + Background
 
 on:
   push:
@@ -20,18 +20,24 @@ jobs:
           npm install -g @capacitor/cli@5.7.0
           npm install
 
-      - name: Add iOS platform
+      - name: Add iOS
         run: |
           cap add ios
 
-      - name: Inject BackgroundTTS via CocoaPods
+      - name: Inject BackgroundTTS + Icon
         run: |
           echo "pod 'BackgroundTTS', :path => '../../ios-plugin'" >> ios/App/Podfile
-          cat ios/App/Podfile
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" ios/App/App/Info.plist 2>/dev/null || true
           /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" ios/App/App/Info.plist 2>/dev/null || true
+          echo "=== Applying custom icon ==="
+          ICONSET="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+          ls $ICONSET
+          cp icons/AppIcon-*.png $ICONSET/ || true
+          cp icons/Contents.json $ICONSET/Contents.json || true
+          ls -lh $ICONSET/
+          echo "Icon applied"
 
-      - name: Copy web assets
+      - name: Copy web
         run: |
           cap copy ios
 
@@ -39,11 +45,9 @@ jobs:
         run: |
           cd ios/App
           pod install --repo-update
-          echo "=== Pods installed ==="
-          ls Pods/ | grep -i background || true
           cd ../..
 
-      - name: Build IPA
+      - name: Build
         run: |
           mkdir -p build
           cd ios/App
@@ -56,13 +60,14 @@ jobs:
           mkdir -p build/Payload
           ditto "$APP_PATH" build/Payload/App.app
           cd build
-          zip -ry PAGES-Background-Fixed.ipa Payload
+          zip -ry PAGES-Premium-Icon-Background.ipa Payload
+          ls -lh *.ipa
           cd ..
 
-      - name: Upload IPA
+      - name: Upload
         uses: actions/upload-artifact@v5
         with:
-          name: PAGES-Background-Fixed-IPA
+          name: PAGES-Premium-IPA
           path: |
             build/*.ipa
             build/build.log
