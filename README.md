@@ -1,1 +1,1 @@
-# PAGES Premium Full + Background Audio - 목차, Aa, 잠금화면 모두 포함
+# PAGES Premium with Icon + Background Audio + Speed Control

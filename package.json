@@ -1,6 +1,6 @@
 {
-  "name": "pages-premium-bg",
-  "version": "5.0.0",
+  "name": "pages-premium-icon",
+  "version": "6.0.0",
   "private": true,
   "dependencies": {
     "@capacitor/core": "5.7.0",
